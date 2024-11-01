@@ -3,21 +3,22 @@ import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
 import Rank from "./components/Rank/Rank";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
+import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import ParticlesBg from 'particles-bg';
 import React, { Component} from "react";
 // import Clarifai from 'clarifai'
-
+//
 // const app = new Clarifai.App({
 //    apiKey: '94d0d6c8abab45ad9b7cba096ad295b9'
 // })
 
-const returnRequestOptions = () => {
+const returnRequestOptions = (ImageUrl) => {
 
    const PAT = 'd583a589bdd14f82ae718401fddfc597';
    const USER_ID = 'quasiich';
    const APP_ID = 'my-first-application';
    // const MODEL_ID = 'face-detection';
-   const IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg';
+   const IMAGE_URL = {ImageUrl};
 
 
    const raw = JSON.stringify({
@@ -52,19 +53,19 @@ class App extends Component {
       super();
       this.state = {
          input: "",
+         imageUrl: ""
       }
    }
 
    onInputChange = (e) => {
-      console.log(e.target.value);
+      this.setState({input: e.target.value});
    }
 
    onButtonSubmit = () => {
-      console.log('click')
-      fetch("https://api.clarifai.com/v2/models/face-detection/outputs", returnRequestOptions())
+      this.setState({imageUrl: this.state.input})
+      fetch("https://api.clarifai.com/v2/models/face-detection/outputs", returnRequestOptions(this.state.input))
          .then(response => response.json())
          .then(result => {
-
             const regions = result.outputs[0].data.regions;
 
             regions.forEach(region => {
@@ -99,7 +100,7 @@ class App extends Component {
             <ImageLinkForm
                onInputChange={this.onInputChange}
                onButtonSubmit={this.onButtonSubmit}/>
-            {/*  <FaceRecognition />}*/}
+            <FaceRecognition imageUrl={this.state.imageUrl}/>
          </div>
       );
    }
