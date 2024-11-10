@@ -9,40 +9,6 @@ import Register from "./components/Register/Register";
 import ParticlesBg from 'particles-bg';
 import React, { Component} from "react";
 
-const returnRequestOptions = (ImageUrl) => {
-
-   const PAT = 'd583a589bdd14f82ae718401fddfc597';
-   const USER_ID = 'quasiich';
-   const APP_ID = 'my-first-application';
-   // const MODEL_ID = 'face-detection';
-   const IMAGE_URL = ImageUrl;
-
-
-   const raw = JSON.stringify({
-      "user_app_id": {
-         "user_id": USER_ID,
-         "app_id": APP_ID
-      },
-      "inputs": [
-         {
-            "data": {
-               "image": {
-                  "url": IMAGE_URL
-               }
-            }
-         }
-      ]
-   });
-
-   return {
-      method: 'POST',
-      headers: {
-         'Accept': 'application/json',
-         'Authorization': 'Key ' + PAT
-      },
-      body: raw
-   };
-}
 
 const initialState = {
       input: "",
@@ -89,7 +55,6 @@ class App extends Component {
    }
 
    displayFaceBox = (box) => {
-      console.log(box);
       this.setState({box: box}) //this.setState({box})
    }
 
@@ -98,11 +63,16 @@ class App extends Component {
       }
 
    onButtonSubmit = () => {
-      this.setState({imageUrl: this.state.input})
-      fetch("https://api.clarifai.com/v2/models/face-detection/outputs", returnRequestOptions(this.state.input))
-         .then(response => response.json())
-         .then(results => {
-            this.displayFaceBox(this.calculateFaceLocation(results))
+      this.setState({ imageUrl: this.state.input});
+         fetch("http://localhost:3000/imageurl", {
+            method: "post",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+               input: this.state.input
+            })
+         })
+            .then(res => res.json())
+            .then(results => {
             if (results) {
                fetch("http://localhost:3000/image", {
                   method: "PUT",
@@ -117,9 +87,10 @@ class App extends Component {
                   })
                   .catch(console.log)
             }
+               this.displayFaceBox(this.calculateFaceLocation(results))
          })
          .catch(error => console.log('error', error))
-   }
+         }
 
    onRouteChange = (route) => {
       if (route === "signout") {
